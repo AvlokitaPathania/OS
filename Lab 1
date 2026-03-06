@@ -1,0 +1,54 @@
+#include <stdio.h>
+
+typedef struct Processes{
+    int pid;
+    int at;
+    int bt;
+    int ct;
+    int tat;
+    int wt;
+    int rt;
+}p;
+
+int main(){
+    int n;
+    printf("Enter number of processes:\n");
+    scanf("%d",&n);
+    p proc[n];
+    for(int i=0;i<n;i++){
+        proc[i].pid=i+1;
+        printf("Enter time of Arrival for %d:\n",i+1);
+        scanf("%d",&proc[i].at);
+        printf("Enter Burst time for %d:\n",i+1);
+        scanf("%d",&proc[i].bt);
+    }
+    for(int i=0;i<n-1;i++){
+        for(int j=i+1;j<n;j++){
+            if(proc[i].at > proc[j].at){
+                p temp = proc[i];
+                proc[i] = proc[j];
+                proc[j] = temp;
+            }
+        }
+    }
+    int time=0;
+    for(int i=0;i<n;i++){
+        if(time<proc[i].at){
+            time=proc[i].at;
+        }
+        proc[i].rt = time - proc[i].at;
+        time+=proc[i].bt;
+        proc[i].ct=time;
+        proc[i].tat= proc[i].ct - proc[i].at;
+        proc[i].wt = proc[i].tat - proc[i].bt;
+
+    }
+
+    printf("\nPID \tAT \tBT \tCT \tTAT \tWT \tRT \n");
+    for(int i=0;i<n;i++){
+            printf("\n%d \t%d \t%d \t%d \t%d \t%d \t%d\n",proc[i].pid,proc[i].at,proc[i].bt,proc[i].ct,proc[i].tat,proc[i].wt,proc[i].rt);
+    }
+    return 0;
+}
+
+
