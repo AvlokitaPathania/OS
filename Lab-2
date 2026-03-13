@@ -1,0 +1,202 @@
+#include <stdio.h>
+#include <limits.h>
+
+typedef struct Processes{
+    int pid;
+    int at;
+    int bt;
+    int ct;
+    int tat;
+    int wt;
+    int rt;
+    int rem;
+    int start;
+    int finished;
+}p;
+void gantt(int pid[], int time[], int size){
+
+    printf("\nGantt Chart:\n");
+
+    for(int i=0;i<size;i++)
+        printf("| P%d ",pid[i]);
+
+    printf("|\n");
+
+    for(int i=0;i<=size;i++)
+        printf("%d    ",time[i]);
+
+    printf("\n");
+}
+void avg(p proc[], int n){
+    float avg_tat=0,avg_wt=0,avg_rt=0;
+    for(int i=0;i<n;i++){
+        avg_tat += proc[i].tat;
+        avg_wt += proc[i].wt;
+        avg_rt += proc[i].rt;
+    }
+    printf("Average Turn Around Time is %.2f\n", avg_tat/n);
+    printf("Average Waiting Time is %.2f\n", avg_wt/n);
+    printf("Average Response Time is %.2f\n", avg_rt/n);
+}
+void sjf(p proc[], int n){
+
+    int time=0,completed=0;
+
+    int pid[100];
+    int t[100];
+    int k=0;
+
+    t[k]=0;
+
+    while(completed<n){
+
+        int idx=-1;
+        int min_bt=INT_MAX;
+
+        for(int i=0;i<n;i++){
+
+            if(proc[i].at<=time && proc[i].finished==0){
+
+                if(proc[i].bt<min_bt){
+                    min_bt=proc[i].bt;
+                    idx=i;
+                }
+            }
+        }
+
+        if(idx!=-1){
+
+            proc[idx].start=time;
+
+            time+=proc[idx].bt;
+
+            proc[idx].ct=time;
+            proc[idx].tat=proc[idx].ct-proc[idx].at;
+            proc[idx].wt=proc[idx].tat-proc[idx].bt;
+            proc[idx].rt=proc[idx].start-proc[idx].at;
+
+            proc[idx].finished=1;
+            completed++;
+
+            pid[k]=proc[idx].pid;
+            k++;
+            t[k]=time;
+        }
+
+        else
+            time++;
+    }
+
+    gantt(pid,t,k);
+}
+void srtf(p proc[], int n){
+
+    int time=0,completed=0;
+
+    int pid[100];
+    int t[100];
+    int k=0;
+
+    int last=-1;
+
+    t[k]=0;
+
+    while(completed<n){
+
+        int idx=-1;
+        int min_rem=INT_MAX;
+
+        for(int i=0;i<n;i++){
+
+            if(proc[i].at<=time && proc[i].finished==0){
+
+                if(proc[i].rem<min_rem){
+                    min_rem=proc[i].rem;
+                    idx=i;
+                }
+            }
+        }
+
+        if(idx!=-1){
+
+            if(proc[idx].rem==proc[idx].bt)
+                proc[idx].start=time;
+
+            if(last!=proc[idx].pid){
+                pid[k]=proc[idx].pid;
+                t[k]=time;
+                k++;
+                last=proc[idx].pid;
+            }
+
+            proc[idx].rem--;
+            time++;
+
+            if(proc[idx].rem==0){
+
+                proc[idx].ct=time;
+                proc[idx].tat=proc[idx].ct-proc[idx].at;
+                proc[idx].wt=proc[idx].tat-proc[idx].bt;
+                proc[idx].rt=proc[idx].start-proc[idx].at;
+
+                proc[idx].finished=1;
+                completed++;
+            }
+        }
+
+        else
+            time++;
+    }
+
+    t[k]=time;
+
+    gantt(pid,t,k);
+}
+int main(){
+
+    int n;
+
+    printf("Enter number of processes:\n");
+    scanf("%d",&n);
+
+    p proc[n];
+
+    for(int i=0;i<n;i++){
+
+        proc[i].pid=i+1;
+
+        printf("Enter Arrival Time:\n");
+        scanf("%d",&proc[i].at);
+
+        printf("Enter Burst Time:\n");
+        scanf("%d",&proc[i].bt);
+
+        proc[i].rem=proc[i].bt;
+        proc[i].finished=0;
+    }
+
+    printf("\n1. Non Preemptive SJF\n2. Preemptive SJF\n");
+
+    int choice;
+    scanf("%d",&choice);
+
+    if(choice==1)
+        sjf(proc,n);
+    else
+        srtf(proc,n);
+
+    printf("\nPID AT BT CT TAT WT RT\n");
+
+    for(int i=0;i<n;i++){
+        printf("%d %d %d %d %d %d %d\n",
+        proc[i].pid,
+        proc[i].at,
+        proc[i].bt,
+        proc[i].ct,
+        proc[i].tat,
+        proc[i].wt,
+        proc[i].rt);
+    }
+
+    avg(proc,n);
+}
