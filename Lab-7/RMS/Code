@@ -1,0 +1,51 @@
+#include <stdio.h>
+
+struct Process {
+    int id;
+    int execution_time;
+    int deadline;
+};
+
+int main() {
+    int n, i, j;
+    struct Process p[10], temp;
+
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    // Input process details
+    for(i = 0; i < n; i++) {
+        printf("\nEnter Execution Time for Process P%d: ", i + 1);
+        scanf("%d", &p[i].execution_time);
+
+        printf("Enter Deadline for Process P%d: ", i + 1);
+        scanf("%d", &p[i].deadline);
+
+        p[i].id = i + 1;
+    }
+
+    // Sort processes based on earliest deadline
+    for(i = 0; i < n - 1; i++) {
+        for(j = i + 1; j < n; j++) {
+            if(p[i].deadline > p[j].deadline) {
+                temp = p[i];
+                p[i] = p[j];
+                p[j] = temp;
+            }
+        }
+    }
+
+    // Display EDF Scheduling Order
+    printf("\nProcesses scheduled using Earliest Deadline First (EDF):\n");
+
+    printf("\nProcess\tExecution Time\tDeadline\n");
+
+    for(i = 0; i < n; i++) {
+        printf("P%d\t%d\t\t%d\n",
+               p[i].id,
+               p[i].execution_time,
+               p[i].deadline);
+    }
+
+    return 0;
+}
