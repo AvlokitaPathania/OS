@@ -1,0 +1,33 @@
+#include <stdio.h>
+
+int main() {
+    int P = 5, R = 3;
+    int alloc[5][3] = {{0,1,0}, {2,0,0}, {3,0,3}, {2,1,1}, {0,0,2}};
+    int req[5][3] =   {{0,0,0}, {2,0,2}, {0,0,0}, {1,0,0}, {0,0,2}};
+    int avail[3] =    {0,0,0}, finish[5] = {0}, deadlocked = 0;
+
+    for (int k = 0; k < P; k++) {
+        for (int i = 0; i < P; i++) {
+            if (finish[i]) continue;
+            
+            int can_grant = 1;
+            for (int j = 0; j < R; j++)
+                if (req[i][j] > avail[j]) can_grant = 0;
+
+            if (can_grant) {
+                for (int j = 0; j < R; j++) avail[j] += alloc[i][j];
+                finish[i] = 1;
+            }
+        }
+    }
+
+    for (int i = 0; i < P; i++) {
+        if (!finish[i]) {
+            printf("Process P%d is Deadlocked\n", i);
+            deadlocked = 1;
+        }
+    }
+
+    if (!deadlocked) printf("No Deadlock Detected\n");
+    return 0;
+}
