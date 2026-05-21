@@ -1,85 +1,75 @@
 #include <stdio.h>
 
-#define LARGE_CONSTANT 10000   // Used to calculate stride
-
-typedef struct {
+struct Process {
     int pid;
-    int tickets;
-    int stride;
-    int pass;
-    int remaining_time;
-} Process;
-
-// Function to find process with minimum pass value
-int find_winner(Process p[], int n) {
-    int min_pass = 1000000;
-    int winner_idx = -1;
-
-    for (int i = 0; i < n; i++) {
-        if (p[i].remaining_time > 0) {
-            if (p[i].pass < min_pass) {
-                min_pass = p[i].pass;
-                winner_idx = i;
-            }
-        }
-    }
-
-    return winner_idx;
-}
+    int bt;   // Burst Time
+    int pr;   // Priority
+    int wt;   // Waiting Time
+    int tat;  // Turnaround Time
+};
 
 int main() {
-    int n, total_burst = 0;
+    int n, i, j;
+    float avg_wt = 0, avg_tat = 0;
 
     printf("Enter number of processes: ");
     scanf("%d", &n);
 
-    Process p[n];
+    struct Process p[n], temp;
 
-    // Input process details
-    for (int i = 0; i < n; i++) {
+    // Input
+    for(i = 0; i < n; i++) {
+        printf("\nEnter Burst Time and Priority for Process %d: ", i + 1);
+        scanf("%d %d", &p[i].bt, &p[i].pr);
+
         p[i].pid = i + 1;
-
-        printf("\nProcess %d - Enter Burst Time: ", i + 1);
-        scanf("%d", &p[i].remaining_time);
-
-        printf("Process %d - Enter Tickets: ", i + 1);
-        scanf("%d", &p[i].tickets);
-
-        // Higher tickets -> Smaller stride
-        p[i].stride = LARGE_CONSTANT / p[i].tickets;
-
-        p[i].pass = 0;
-
-        total_burst += p[i].remaining_time;
     }
 
-    printf("\n--- Scheduling Sequence ---\n");
-    printf("Time\tWinner\tPass Value Update\n");
-    printf("-----------------------------------------\n");
-
-    int current_time = 0;
-
-    while (current_time < total_burst) {
-
-        int idx = find_winner(p, n);
-
-        if (idx == -1)
-            break;
-
-        printf("%d\tP%d\tPass: %d -> %d\n",
-               current_time,
-               p[idx].pid,
-               p[idx].pass,
-               p[idx].pass + p[idx].stride);
-
-        // Update pass value
-        p[idx].pass += p[idx].stride;
-
-        // Execute process for 1 unit time
-        p[idx].remaining_time--;
-
-        current_time++;
+    // Sort processes based on priority
+    // Smaller number = Higher priority
+    for(i = 0; i < n - 1; i++) {
+        for(j = i + 1; j < n; j++) {
+            if(p[i].pr > p[j].pr) {
+                temp = p[i];
+                p[i] = p[j];
+                p[j] = temp;
+            }
+        }
     }
+
+    // Calculate Waiting Time
+    p[0].wt = 0;
+
+    for(i = 1; i < n; i++) {
+        p[i].wt = p[i - 1].wt + p[i - 1].bt;
+    }
+
+    // Calculate Turnaround Time
+    for(i = 0; i < n; i++) {
+        p[i].tat = p[i].wt + p[i].bt;
+
+        avg_wt += p[i].wt;
+        avg_tat += p[i].tat;
+    }
+
+    // Output
+    printf("\nPID\tBT\tPR\tWT\tTAT\n");
+
+    for(i = 0; i < n; i++) {
+        printf("%d\t%d\t%d\t%d\t%d\n",
+               p[i].pid,
+               p[i].bt,
+               p[i].pr,
+               p[i].wt,
+               p[i].tat);
+    }
+
+    // Average calculations
+    avg_wt /= n;
+    avg_tat /= n;
+
+    printf("\nAverage Waiting Time = %.2f", avg_wt);
+    printf("\nAverage Turnaround Time = %.2f\n", avg_tat);
 
     return 0;
 }
