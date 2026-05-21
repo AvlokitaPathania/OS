@@ -3,7 +3,7 @@
 struct Process {
     int id;
     int execution_time;
-    int deadline;
+    int period;
 };
 
 int main() {
@@ -18,16 +18,16 @@ int main() {
         printf("\nEnter Execution Time for Process P%d: ", i + 1);
         scanf("%d", &p[i].execution_time);
 
-        printf("Enter Deadline for Process P%d: ", i + 1);
-        scanf("%d", &p[i].deadline);
+        printf("Enter Period for Process P%d: ", i + 1);
+        scanf("%d", &p[i].period);
 
         p[i].id = i + 1;
     }
 
-    // Sort processes based on earliest deadline
+    // Sort according to smaller period (higher priority)
     for(i = 0; i < n - 1; i++) {
         for(j = i + 1; j < n; j++) {
-            if(p[i].deadline > p[j].deadline) {
+            if(p[i].period > p[j].period) {
                 temp = p[i];
                 p[i] = p[j];
                 p[j] = temp;
@@ -35,16 +35,16 @@ int main() {
         }
     }
 
-    // Display EDF Scheduling Order
-    printf("\nProcesses scheduled using Earliest Deadline First (EDF):\n");
+    // Display RMS Scheduling Order
+    printf("\nProcesses scheduled using Rate Monotonic Scheduling:\n");
 
-    printf("\nProcess\tExecution Time\tDeadline\n");
+    printf("\nProcess\tExecution Time\tPeriod\tPriority\n");
 
     for(i = 0; i < n; i++) {
-        printf("P%d\t%d\t\t%d\n",
+        printf("P%d\t%d\t\t%d\tHigh\n",
                p[i].id,
                p[i].execution_time,
-               p[i].deadline);
+               p[i].period);
     }
 
     return 0;
