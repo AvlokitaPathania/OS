@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#define LARGE_CONSTANT 10000 
+#define LARGE_CONSTANT 10000   // Used to calculate stride
 
 typedef struct {
     int pid;
@@ -10,71 +10,76 @@ typedef struct {
     int remaining_time;
 } Process;
 
-// Improved find_winner logic
+// Function to find process with minimum pass value
 int find_winner(Process p[], int n) {
-    int min_pass = 2147483647; // Max INT value
+    int min_pass = 1000000;
     int winner_idx = -1;
 
     for (int i = 0; i < n; i++) {
         if (p[i].remaining_time > 0) {
-            // Pick the process with the lowest pass value
             if (p[i].pass < min_pass) {
                 min_pass = p[i].pass;
                 winner_idx = i;
-            } 
-            // Tie-breaker: if passes are equal, pick the one with more tickets (smaller stride)
-            else if (p[i].pass == min_pass) {
-                if (winner_idx == -1 || p[i].stride < p[winner_idx].stride) {
-                    winner_idx = i;
-                }
             }
         }
     }
+
     return winner_idx;
 }
 
 int main() {
     int n, total_burst = 0;
-    
+
     printf("Enter number of processes: ");
-    if (scanf("%d", &n) != 1 || n <= 0) return 1;
+    scanf("%d", &n);
 
     Process p[n];
 
+    // Input process details
     for (int i = 0; i < n; i++) {
         p[i].pid = i + 1;
-        printf("\n--- Process %d ---\n", i + 1);
-        printf("Burst Time: ");
+
+        printf("\nProcess %d - Enter Burst Time: ", i + 1);
         scanf("%d", &p[i].remaining_time);
-        printf("Tickets: ");
+
+        printf("Process %d - Enter Tickets: ", i + 1);
         scanf("%d", &p[i].tickets);
-        
-        // Stride is inversely proportional to tickets
+
+        // Higher tickets -> Smaller stride
         p[i].stride = LARGE_CONSTANT / p[i].tickets;
-        p[i].pass = 0; 
+
+        p[i].pass = 0;
+
         total_burst += p[i].remaining_time;
     }
 
-    printf("\n%-10s %-10s %-20s\n", "Time", "Winner", "Pass Value Update");
-    printf("----------------------------------------------\n");
+    printf("\n--- Scheduling Sequence ---\n");
+    printf("Time\tWinner\tPass Value Update\n");
+    printf("-----------------------------------------\n");
 
     int current_time = 0;
+
     while (current_time < total_burst) {
+
         int idx = find_winner(p, n);
-        
-        if (idx == -1) break;
 
-        printf("%-10d P%-9d %d -> %d\n", 
-                current_time, p[idx].pid, p[idx].pass, p[idx].pass + p[idx].stride);
+        if (idx == -1)
+            break;
 
-        // Increment pass by stride
+        printf("%d\tP%d\tPass: %d -> %d\n",
+               current_time,
+               p[idx].pid,
+               p[idx].pass,
+               p[idx].pass + p[idx].stride);
+
+        // Update pass value
         p[idx].pass += p[idx].stride;
+
+        // Execute process for 1 unit time
         p[idx].remaining_time--;
+
         current_time++;
     }
-
-    printf("----------------------------------------------\n");
-    printf("Scheduling Complete.\n");
 
     return 0;
 }
