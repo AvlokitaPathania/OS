@@ -1,0 +1,59 @@
+#include <stdio.h>
+
+int main() {
+    int pages[] = {1, 2, 3, 4, 1, 2, 5};
+    int frames[3] = {-1, -1, -1};
+    int n = 7, m = 3;
+    int faults = 0;
+    for (int i = 0; i < n; i++) {
+        int page = pages[i];
+        int hit = 0;
+        for (int j = 0; j < m; j++) {
+            if (frames[j] == page) {
+                hit = 1;
+                break;
+            }
+        }
+        if (!hit) {
+            int pos = -1;
+            for (int j = 0; j < m; j++) {
+                if (frames[j] == -1) {
+                    pos = j;
+                    break;
+                }
+            }
+            if (pos == -1) {
+                int farthest = -1;
+                for (int j = 0; j < m; j++) {
+                    int next_use = n; 
+                    for (int k = i + 1; k < n; k++) {
+                        if (frames[j] == pages[k]) {
+                            next_use = k;
+                            break;
+                        }
+                    }
+                    if (next_use > farthest) {
+                        farthest = next_use;
+                        pos = j;
+                    }
+                }
+            }
+            frames[pos] = page;
+            faults++;
+        }
+        printf("%d -> ", page);
+
+        for (int j = 0; j < m; j++) {
+            if (frames[j] == -1)
+                printf("- ");
+            else
+                printf("%d ", frames[j]);
+        }
+        if (hit)
+            printf("(Hit)\n");
+        else
+            printf("(Fault)\n");
+    }
+    printf("\nTotal Page Faults = %d\n", faults);
+    return 0;
+}
